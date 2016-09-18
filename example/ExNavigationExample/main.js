@@ -1,281 +1,59 @@
-import React, { Component, PropTypes } from 'react';
-import {
-  AppRegistry,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-
+import React from 'react';
+import { StatusBar } from 'react-native';
 import Exponent from 'exponent';
+import HomeScreen from './components/HomeScreen';
+import TranslucentBarExample from './components/TranslucentBarExample';
 
 import {
   createRouter,
   NavigationProvider,
   StackNavigation,
-  NavigationStyles,
-  TabNavigation,
-  TabNavigationItem as TabItem,
 } from '@exponent/ex-navigation';
 
-const AppRouter = createRouter(() => ({
-  modal: () => ModalContainer,
-  landing: () => LandingScreen,
-  another: () => AnotherRouteScreen,
-  nestedNav: () => NestedNavigationScreen,
-  tabLanding: () => TabLandingScreen,
+/**
+  * This is where we map route names to route components. Any React
+  * component can be a route, it only needs to have a static `route`
+  * property defined on it, as in HomeScreen below
+  */
+export const Router = createRouter(() => ({
+  home: () => HomeScreen,
+  tabNavigationExample: () => null,
+  slidingTabNavigationExample: () => null,
+  drawerNavigationExample: () => null,
+  alertBarsExample: () => null,
+  translucentBarExample: () => TranslucentBarExample,
 }));
 
-class LandingScreen extends Component {
-  static route = {
-    navigationBar: {
-      title: 'Landing',
-    },
-  }
-
-  componentDidMount() {
-    this.props.navigator.showLocalAlert('Hello!', {
-      text: {color: '#fff'},
-      container: {backgroundColor: 'red'},
-    });
-  }
-
+class App extends React.Component {
   render() {
+    /**
+      * NavigationProvider is only needed at the top level of the app,
+      * similar to react-redux's Provider component. It passes down
+      * navigation objects and functions through context to children.
+      *
+      * StackNavigation represents a single stack of screens, you can
+      * think of a stack like a stack of playing cards, and each time
+      * you add a screen it slides in on top. Stacks can contain
+      * other stacks, for example if you have a tab bar, each of the
+      * tabs has its own individual stack. This is where the playing
+      * card analogy falls apart, but it's still useful when thinking
+      * of individual stacks.
+      */
     return (
-      <View style={styles.container}>
-        <TouchableOpacity onPress={this.onPressForward} style={{ height: 20, width: 150, backgroundColor: 'red' }}>
-          <Text>Go forward</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={this.onPressBack} style={{ height: 20, width: 150, backgroundColor: 'blue' }}>
-          <Text>Go back</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={this.onPressOpenModal} style={{ height: 20, width: 150, backgroundColor: 'pink' }}>
-          <Text>Open a modal (that has tabs)!</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
-  onPressForward = () => {
-    this.props.navigator.push(
-      AppRouter.getRoute('another', {
-        text: 'Some dynamic text!',
-      })
-    );
-  }
-
-  onPressBack = () => {
-    try {
-      const parentNavigator = this.props.navigator.getParentNavigator();
-      parentNavigator.pop();
-    } catch (e) {}
-  }
-
-  onPressOpenModal = () => {
-    const rootNavigator = this.props.navigation.getNavigator('root');
-    rootNavigator.push(AppRouter.getRoute('modal', {
-      initialRoute: 'tabLanding',
-    }));
-  }
-}
-
-class AnotherRouteScreen extends Component {
-  static propTypes = {
-    text: PropTypes.string.isRequired,
-  };
-
-  static route = {
-    navigationBar: {
-      title: 'Another Route',
-    },
-  }
-
-  state = {
-    otherText: '',
-  }
-
-  componentDidMount() {
-    const ee = this.props.route.getEventEmitter();
-
-    this.listener = ee.addListener('hello', () => {
-      this.setState({
-        otherText: 'some other text',
-      });
-    });
-
-    setTimeout(() => {
-      ee.emit('hello');
-    }, 5000);
-  }
-
-  componentWillUnmount() {
-    if (this.listener) {
-      this.listener.remove();
-    }
-  }
-
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>
-          {this.state.otherText}
-        </Text>
-        <Text style={styles.welcome}>
-          {this.props.text}
-        </Text>
-        <TouchableOpacity onPress={this.onPressForward} style={{ height: 20, width: 150, backgroundColor: 'green' }}>
-          <Text>Go forward</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={this.onPressBack} style={{ height: 20, width: 150, backgroundColor: 'yellow' }}>
-          <Text>Go back</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={this.onPressReplace} style={{ height: 20, width: 150, backgroundColor: 'pink' }}>
-          <Text>Replace</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={this.onPressReset} style={{ height: 20, width: 150, backgroundColor: 'purple' }}>
-          <Text>Reset!</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
-  onPressForward = () => {
-    this.props.navigator.push(
-      AppRouter.getRoute('nestedNav')
-    );
-  }
-
-  onPressBack = () => {
-    this.props.navigator.pop();
-  }
-
-  onPressReplace = () => {
-    this.props.navigator.replace(AppRouter.getRoute('tabLanding'));
-  }
-
-  onPressReset = () => {
-    this.props.navigation.getNavigator('root').immediatelyResetStack([
-      AppRouter.getRoute('landing'),
-    ]);
-  }
-}
-
-class NestedNavigationScreen extends Component {
-  static route = {
-    navigationBar: {
-      visible: false,
-    },
-  }
-
-  render() {
-    return (
-      <StackNavigation
-        defaultRouteConfig={{
-          navigationBar: {
-            visible: true,
-          },
-        }}
-        initialRoute={AppRouter.getRoute('landing')}
-      />
-    );
-  }
-}
-
-class ModalContainer extends Component {
-  static propTypes = {
-    initialRoute: PropTypes.string.isRequired,
-  };
-
-  static route = {
-    styles: NavigationStyles.FloatVertical,
-    navigationBar: {
-      visible: false,
-    },
-  }
-
-  render() {
-    return (
-      <StackNavigation
-        defaultRouteConfig={{
-          navigationBar: {
-            visible: false,
-          },
-        }}
-        initialRoute={AppRouter.getRoute(this.props.initialRoute)}
-      />
-    );
-  }
-}
-
-class TabLandingScreen extends Component {
-  render() {
-    return (
-      <View style={styles.container}>
-        <TabNavigation
-          initialTab="home">
-          <TabItem
-            id="home"
-            selectedStyle={styles.selectedTab}
-            title="Home Tab">
-            <StackNavigation
-              initialRoute={AppRouter.getRoute('landing')}
-            />
-          </TabItem>
-          <TabItem
-            id="other"
-            selectedStyle={styles.selectedTab}
-            title="Other Tab">
-            <StackNavigation
-              initialRoute={AppRouter.getRoute('another', { text: `I'm in a tab!`})}
-            />
-          </TabItem>
-        </TabNavigation>
-      </View>
-    );
-  }
-}
-
-class App extends Component {
-  render() {
-    return (
-      <StackNavigation
-        id="root"
-        initialRoute={AppRouter.getRoute('landing')}
-      />
-    );
-  }
-}
-
-export default class AppContainer extends Component {
-  render() {
-    return (
-      <NavigationProvider router={AppRouter}>
-        <App />
+      <NavigationProvider router={Router}>
+        <StatusBar barStyle="light-content" />
+        <StackNavigation
+          defaultRouteConfig={{
+            navigationBar: {
+              backgroundColor: '#0084FF',
+              tintColor: '#fff',
+            },
+          }}
+          initialRoute={Router.getRoute('home')}
+        />
       </NavigationProvider>
     );
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  selectedTab: {
-    backgroundColor: '#eee',
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
-});
-
-AppRegistry.registerComponent('main', () => AppContainer);
+Exponent.registerRootComponent(App);
