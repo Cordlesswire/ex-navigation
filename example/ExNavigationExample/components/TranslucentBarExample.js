@@ -5,16 +5,18 @@ import {
   View,
   StatusBar,
 } from 'react-native';
-import { Asset } from 'exponent';
 import {
   TabNavigation,
   TabNavigationItem,
 } from '@exponent/ex-navigation';
 import { Ionicons } from '@exponent/vector-icons';
+import AssetLoader from '../AssetLoader';
 
-Asset.fromModule(require('../assets/colorful-windows.jpg')).downloadAsync();
-Asset.fromModule(require('../assets/beetle.jpg')).downloadAsync();
-Asset.fromModule(require('../assets/paintbrush.jpg')).downloadAsync();
+AssetLoader.preloadModules([
+  require('../assets/colorful-windows.jpg'),
+  require('../assets/beetle.jpg'),
+  require('../assets/paintbrush.jpg'),
+]);
 
 export default class TranslucentBarExample extends Component {
   static route = {

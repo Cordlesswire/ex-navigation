@@ -1,6 +1,7 @@
 import React from 'react';
 import { StatusBar } from 'react-native';
 import Exponent from 'exponent';
+import AssetLoader from './AssetLoader';
 import HomeScreen from './components/HomeScreen';
 import TranslucentBarExample from './components/TranslucentBarExample';
 
@@ -40,18 +41,20 @@ class App extends React.Component {
       * of individual stacks.
       */
     return (
-      <NavigationProvider router={Router}>
-        <StatusBar barStyle="light-content" />
-        <StackNavigation
-          defaultRouteConfig={{
-            navigationBar: {
-              backgroundColor: '#0084FF',
-              tintColor: '#fff',
-            },
-          }}
-          initialRoute={Router.getRoute('home')}
-        />
-      </NavigationProvider>
+      <AssetLoader>
+        <NavigationProvider router={Router}>
+          <StatusBar barStyle="light-content" />
+          <StackNavigation
+            defaultRouteConfig={{
+              navigationBar: {
+                backgroundColor: '#0084FF',
+                tintColor: '#fff',
+              },
+            }}
+            initialRoute={Router.getRoute('home')}
+          />
+        </NavigationProvider>
+      </AssetLoader>
     );
   }
 }
