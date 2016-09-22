@@ -12,30 +12,22 @@ function preloadFonts(fonts) {
   preloadFontList.push(...fonts);
 }
 
-function loadAssetsAsync() {
-  return new Promise((resolve, reject) => {
-    setTimeout(async () => {
-      const promises = [];
-      while (preloadModuleList.length) {
-        const module = preloadModuleList.pop();
-        promises.push(
-          Asset.fromModule(module).downloadAsync()
-        );
-      }
-      while (preloadFontList.length) {
-        const font = preloadFontList.pop();
-        promises.push(
-          Asset.Font.loadAsync(font)
-        );
-      }
-      try {
-        await Promise.all(promises);
-        resolve();
-      } catch (e) {
-        reject(e);
-      }
-    }, 0);
-  });
+async function loadAssetsAsync() {
+  await new Promise(resolve => setTimeout(resolve, 0));
+  const promises = [];
+  while (preloadModuleList.length) {
+    const module = preloadModuleList.pop();
+    promises.push(
+      Asset.fromModule(module).downloadAsync()
+    );
+  }
+  while (preloadFontList.length) {
+    const font = preloadFontList.pop();
+    promises.push(
+      Asset.Font.loadAsync(font)
+    );
+  }
+  await Promise.all(promises);
 }
 
 export default class AssetLoader extends Component {
